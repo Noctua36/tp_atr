@@ -5,7 +5,7 @@ from parametros_tanque import parametros
 from math import sqrt, pi
 import logging
 import time
-
+from simple_pid import PID
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -13,6 +13,11 @@ vazao_in = 0.0
 nivel_atual = 8.0
 nivel_ref = 10.0 # setpoint
 vazao_out = 0.0
+
+
+pid = PID(1, 0.1, 0.05, setpoint=nivel_ref)
+pid.output_limits = (0, 10) 
+pid.tunings = (1.0, 0.2, 0.4)
 
 class ProcessThread(Thread):
     
@@ -48,7 +53,7 @@ class ProcessThread(Thread):
             lastT = now
             nivel_atual = self.rk4(self, self.dhdt, lastT, nivel_atual, deltaT, vazao_in)
             logging.debug('nivel_atual = {:.2f}'.format(nivel_atual))
-            time.sleep(0.50)
+            time.sleep(0.05)
             
 
 class SoftPLCThread(Thread):
@@ -58,15 +63,16 @@ class SoftPLCThread(Thread):
         
     def run(self):
         logging.debug('Soft PLC Thread iniciada')
-        global vazao_in, nivel_atual, nivel_ref
+        global vazao_in, nivel_atual #, nivel_ref
         while True:
-            if nivel_atual > nivel_ref:
-                vazao_in *= 0.9 # diminui 5% da vazao
-            elif nivel_atual < nivel_ref:
-                vazao_in = vazao_in*1.15 if vazao_in>0 else 0.5 # aumenta 5% da vazao
+            vazao_in = pid(nivel_atual)
+            # if nivel_atual > nivel_ref:
+            #     vazao_in *= 0.9 # diminui 5% da vazao
+            # elif nivel_atual < nivel_ref:
+            #     vazao_in = vazao_in*1.15 if vazao_in>0 else 0.5 # aumenta 5% da vazao
 
             logging.debug('vazao_in = {:.2f}'.format(vazao_in))
-            time.sleep(0.050)
+            time.sleep(0.05)
 
         
 

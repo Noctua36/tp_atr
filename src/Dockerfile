@@ -4,6 +4,7 @@ RUN apk add --update \
     nodejs \
     nodejs-npm \
   && npm i -g nodemon \
+  && pip install simple-pid \
   && rm -rf /var/cache/apk/*
 
 # COPY src/requirements.txt /
