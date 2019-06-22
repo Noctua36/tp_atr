@@ -5,6 +5,7 @@ from parametros_tanque import parametros
 from math import sqrt, pi
 import logging
 import time
+from subprocess import call
 from simple_pid import PID
 
 logging.basicConfig(level=logging.DEBUG)
@@ -75,26 +76,6 @@ class SoftPLCThread(Thread):
             time.sleep(0.05)
 
         
-
-# class Synoptic_process(Thread):
-#     """docstring for synoptc_process."""
-    
-#     # def __init__(self, arg):
-#         # self.arg = arg
-
-#     def run(self):
-#         exibe_info()
-#         teclado()
-
-#     def exibe_info(self):
-#         global vazao_in, vazao_out, nivel_atual, nivel_ref
-#         print('vazao_in = {} \nnivel_atual = {} \nnivel_ref = {}'.format(vazao_in, nivel_atual, nivel_ref))
-#         pass
-    
-#     def teclado(self):
-#         pass
-
-
 class Executor():
 
     def run(self):
@@ -109,9 +90,11 @@ class Executor():
         processThread.setName('processThread')
         processThread.start()
 
+        call(['python', 'synoptic.py'])
+
         softPLCThread.join()
         processThread.join()
-        
+       
 
 main = Executor()
 main.run()
