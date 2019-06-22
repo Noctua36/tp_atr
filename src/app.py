@@ -39,7 +39,7 @@ class ProcessThread(Thread):
         return h0+dt*(f1+2.0*f2+2.0*f3+f4)/6.0
 
     def run(self):
-        global vazao_in, vazao_out, nivel_atual, nivel_ref
+        global vazao_in, nivel_atual
         lastT = time.time()
         logging.debug('Process Thread iniciada')
         while True:
@@ -47,8 +47,8 @@ class ProcessThread(Thread):
             deltaT = now - lastT
             lastT = now
             nivel_atual = self.rk4(self, self.dhdt, lastT, nivel_atual, deltaT, vazao_in)
-            logging.debug('nivel_atual = {}'.format(nivel_atual))
-            time.sleep(0.050)
+            logging.debug('nivel_atual = {:.2f}'.format(nivel_atual))
+            time.sleep(0.50)
             
 
 class SoftPLCThread(Thread):
@@ -58,15 +58,14 @@ class SoftPLCThread(Thread):
         
     def run(self):
         logging.debug('Soft PLC Thread iniciada')
-        global vazao_in, vazao_out, nivel_atual, nivel_ref
-
+        global vazao_in, nivel_atual, nivel_ref
         while True:
-            if vazao_in == 0: 
-                vazao_in = vazao_out
             if nivel_atual > nivel_ref:
-                vazao_in *= 0.95 # diminui 5% da vazao
+                vazao_in *= 0.9 # diminui 5% da vazao
             elif nivel_atual < nivel_ref:
-                vazao_in *= 1.05 # aumenta 5% da vazao
+                vazao_in = vazao_in*1.15 if vazao_in>0 else 0.5 # aumenta 5% da vazao
+
+            logging.debug('vazao_in = {:.2f}'.format(vazao_in))
             time.sleep(0.050)
 
         
@@ -93,18 +92,20 @@ class SoftPLCThread(Thread):
 class Executor():
 
     def run(self):
+        
+        softPLCThread = SoftPLCThread()
+        softPLCThread.setDaemon(True)
+        softPLCThread.setName('softPLCThread')
+        softPLCThread.start()
+
         processThread = ProcessThread(parametros['Cv'], parametros['raio_inf'], parametros['raio_sup'], parametros['altura'])
         processThread.setDaemon(True)
         processThread.setName('processThread')
         processThread.start()
-        processThread.join()
 
-        softPLCThread = SoftPLCThread()
-        softPLCThread.setDaemon(True)
-        processThread.setName('softPLCThread')
-        softPLCThread.start()
         softPLCThread.join()
-
+        processThread.join()
+        
 
 main = Executor()
 main.run()
