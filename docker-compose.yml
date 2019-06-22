@@ -1,0 +1,9 @@
+version: "3.3"
+
+services:
+  tpatr:
+    build: ./src
+    command: nodemon --watch *.py --exec "python" app.py
+    volumes:
+      - ./src:/app
+    
