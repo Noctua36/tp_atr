@@ -1,3 +1,4 @@
+import os
 from threading import Thread
 from socket import AF_INET, socket, SOCK_STREAM
 from parametros_tanque import parametros
@@ -133,8 +134,9 @@ class Executor:
         serverThread.start()
 
         time.sleep(2)
-        call(["python", "synoptic.py"])
-
+        dirname = os.path.dirname(__file__)
+        sinoptic = os.path.join(dirname, 'synoptic.py')
+        call(["python", sinoptic])
         softPLCThread.join()
         processThread.join()
         serverThread.join()
