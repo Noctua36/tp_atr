@@ -36,16 +36,18 @@ class SendThread(Thread):
         global client_socket
         while True:
             #TODO: ler entrada do usuário
-            setpoint = round(random.uniform(0, 10), 2)
+            # setpoint = round(random.uniform(0, 10), 2)
+            setpoint = input('')
+            logging.debug('new setpoint: {}'.format(setpoint))
             try:
-                client_socket.send(bytes(str(setpoint), "utf8"))
+                client_socket.send(str(setpoint).encode())
                 if setpoint == "exit":
                     client_socket.close()
             except OSError:
                 pass
                 # break
 
-            time.sleep(30)
+            # time.sleep(30)
 
 
 class Synoptic:

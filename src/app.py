@@ -90,24 +90,29 @@ class ServerThread(Thread):
         self.server.bind(self.addr)
 
     def run(self):
+
+        global nivel_ref
         logging.debug('Server Thread iniciada')
-        
         # self.server.bind(self.addr)
         self.server.listen()
         logging.debug('Aguardando conexão do sinóptico')
         conn, cliAddr = self.server.accept()
-
+        conn.settimeout(1) # impede que o programa fique esperando resposta por muito tempo
         # logging.debug('Connectado por' + cliAddr)
         while True:
             # conn.send(b'123')#bytes(nivel_atual, "utf8"))
             conn.send('\nnivel_atual: {:.2f}\nsetpoint: {:.2f}\nvazao_in: {:.2f}\nvazao_out: {:.2f}\n'.format(nivel_atual, nivel_ref, vazao_in, vazao_out).encode())
                 # str(nivel_atual).encode())
-            time.sleep(1)
+            # time.sleep(1) # não precisa mais disso pois o timeout do recv faz o mesmo
 
-            # data = conn.recv(self.bufSize)
-            # if not data:
-            #     print('sem dados')
-            
+            try:
+                data = conn.recv(self.bufSize).decode()
+                if data:
+                    nivel_ref = float(data)
+                else:
+                    print('sem dados')
+            except:
+                pass
 
 
 class Executor:
