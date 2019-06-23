@@ -13,10 +13,10 @@ mutex_pid = Lock()
 
 logging.basicConfig(level=logging.DEBUG)
 
-vazao_in = 0.0
-nivel_atual = 8.0
-nivel_ref = 10.0  # setpoint
-vazao_out = 0.0
+vazao_in = parametros['start_vazao_in']
+vazao_out = parametros['start_vazao_out']
+nivel_ref = parametros['start_nivel_ref']  # setpoint
+nivel_atual = parametros['start_nivel_atual']
 
 pid = PID(1, 0.1, 0.05, setpoint=nivel_ref)
 pid.output_limits = (0, 10)
