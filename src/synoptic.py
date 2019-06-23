@@ -1,12 +1,16 @@
 from socket import AF_INET, socket, SOCK_STREAM
-from threading import Thread
+from threading import Thread, Lock
 import logging
 import time
 import random
 
+mutex = Lock()
 logging.basicConfig(level=logging.DEBUG)
 
+mutex.acquire()
 client_socket = socket(AF_INET, SOCK_STREAM)
+mutex.release()
+
 bufSize = 1024
 
 
@@ -38,7 +42,7 @@ class SendThread(Thread):
             #TODO: ler entrada do usuário
             # setpoint = round(random.uniform(0, 10), 2)
             setpoint = input('')
-            logging.debug('new setpoint: {}'.format(setpoint))
+            logging.info('new setpoint: {}\n'.format(setpoint))
             try:
                 client_socket.send(str(setpoint).encode())
                 if setpoint == "exit":

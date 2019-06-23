@@ -1,5 +1,5 @@
 import os
-from threading import Thread
+from threading import Thread, Lock
 from socket import AF_INET, socket, SOCK_STREAM
 from parametros_tanque import parametros
 from math import sqrt, pi
@@ -8,6 +8,8 @@ import time
 from subprocess import call
 # TODO: criar implementação pŕopria do PID
 from simple_pid import PID
+mutex = Lock()
+mutex_pid = Lock()
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -75,7 +77,7 @@ class SoftPLCThread(Thread):
         global vazao_in, nivel_atual
         while True:
             vazao_in = pid(nivel_atual)
-            #logging.debug('vazao_in = {:.2f}'.format(vazao_in))
+            #logging.debug('vazao_in = {:.2f}'.format(vazao_in))5
             time.sleep(0.05)
 
 
@@ -86,12 +88,14 @@ class ServerThread(Thread):
         self.port = 30000
         self.addr = (self.host, self.port)
         self.bufSize = 1024
+        mutex.acquire()
         self.server = socket(AF_INET, SOCK_STREAM)
+        mutex.release()
         self.server.bind(self.addr)
 
     def run(self):
 
-        global nivel_ref
+        global nivel_ref, pid
         logging.debug('Server Thread iniciada')
         # self.server.bind(self.addr)
         self.server.listen()
@@ -109,6 +113,9 @@ class ServerThread(Thread):
                 data = conn.recv(self.bufSize).decode()
                 if data:
                     nivel_ref = float(data)
+                    mutex_pid.acquire()
+                    pid.setpoint = nivel_ref
+                    mutex_pid.release()
                 else:
                     print('sem dados')
             except:
