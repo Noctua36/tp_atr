@@ -19,9 +19,9 @@ class ReceiveThread(Thread):
         global client_socket
         while True:
             try:
-                msg = client_socket.recv(bufSize).decode("utf8")
-                if not msg: break
-                print("mensagem recebida: %s" % msg)
+                msg = client_socket.recv(bufSize).decode()
+                # if not msg: break
+                logging.debug(msg)
             except OSError: 
                 pass
                 # break
@@ -59,27 +59,19 @@ class Synoptic:
     def run(self):
         
         client_socket.connect(self.addr)
-        while True:
-            
-            # try:
-            msg = client_socket.recv(bufSize).decode()
-            # if not msg: break
-            logging.debug( msg)
-            # except OSError: 
-            #     logging.debug('erro')
+       
+        receiveThread = ReceiveThread()
+        receiveThread.setDaemon(True)
+        receiveThread.setName("receiveThread")
+        receiveThread.start()
 
-        # receiveThread = ReceiveThread()
-        # receiveThread.setDaemon(True)
-        # receiveThread.setName("receiveThread")
-        # receiveThread.start()
+        sendThread = SendThread()
+        sendThread.setDaemon(True)
+        sendThread.setName("SendThread")
+        sendThread.start()
 
-        # sendThread = SendThread()
-        # sendThread.setDaemon(True)
-        # sendThread.setName("SendThread")
-        # sendThread.start()
-
-        # sendThread.join()
-        # receiveThread.join()
+        sendThread.join()
+        receiveThread.join()
 
 
 main = Synoptic()
