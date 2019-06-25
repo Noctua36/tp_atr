@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread, Lock
 import logging

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import os
 from threading import Thread, Lock
 from socket import AF_INET, socket, SOCK_STREAM
@@ -6,7 +8,6 @@ from math import sqrt, pi
 import logging
 import time
 from subprocess import call
-# TODO: criar implementação pŕopria do PID
 from simple_pid import PID
 mutex = Lock()
 mutex_pid = Lock()
@@ -73,7 +74,6 @@ class SoftPLCThread(Thread):
 
     def run(self):
         logging.debug("Soft PLC Thread iniciada")
-        # TODO threading.lock()
         global vazao_in, nivel_atual
         while True:
             vazao_in = pid(nivel_atual)
@@ -97,16 +97,13 @@ class ServerThread(Thread):
 
         global nivel_ref, pid
         logging.debug('Server Thread iniciada')
-        # self.server.bind(self.addr)
         self.server.listen()
         logging.debug('Aguardando conexão do sinóptico')
         conn, cliAddr = self.server.accept()
         conn.settimeout(1) # impede que o programa fique esperando resposta por muito tempo
         # logging.debug('Connectado por' + cliAddr)
         while True:
-            # conn.send(b'123')#bytes(nivel_atual, "utf8"))
             conn.send('\nnivel_atual: {:.2f}\nsetpoint: {:.2f}\nvazao_in: {:.2f}\nvazao_out: {:.2f}\n'.format(nivel_atual, nivel_ref, vazao_in, vazao_out).encode())
-                # str(nivel_atual).encode())
             # time.sleep(1) # não precisa mais disso pois o timeout do recv faz o mesmo
 
             try:

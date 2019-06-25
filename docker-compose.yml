@@ -4,6 +4,8 @@ services:
   tpatr:
     build: ./src
     command: nodemon --watch *.py --exec "python" app.py
+    stdin_open: true
+    tty: true
     volumes:
       - ./src:/app
     
